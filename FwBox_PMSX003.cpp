@@ -252,3 +252,15 @@ void FwBox_PMSX003::setDelay(FwBox_PMSX003::PMS_DELAY PmsDelay, int Value)
 {
     DelayValue[PmsDelay] = Value;
 }
+
+void FwBox_PMSX003::sleep()
+{
+    PmsSerial->write(PMS_CMD_SLEEP, sizeof(PMS_CMD_SLEEP));
+    delay(DelayValue[FwBox_PMSX003::AFTER_SEND_PASSIVE_CMD]);
+}
+
+void FwBox_PMSX003::wakeup()
+{
+    PmsSerial->write(PMS_CMD_WAKEUP, sizeof(PMS_CMD_WAKEUP));
+    delay(DelayValue[FwBox_PMSX003::AFTER_SEND_PASSIVE_CMD]);
+}

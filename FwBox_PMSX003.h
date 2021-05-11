@@ -126,6 +126,9 @@ public:
     // The function must be run before begin.
     //
     void setDelay(PMS_DELAY PmsDelay, int Value);
+    
+    void sleep();
+    void wakeup();
 
 private:
     SoftwareSerial* PmsSerial;
