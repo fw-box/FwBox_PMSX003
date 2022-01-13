@@ -18,11 +18,13 @@
 #ifndef __FWBOX_PMSX003_H__
 #define __FWBOX_PMSX003_H__
 
-
 #include "SoftwareSerial.h"
-
+#include "HardwareSerial.h"
 
 #define MAX_PMS_DATA_SIZE 32
+
+#define SERIAL_TYPE_SOFT_WARE 1
+#define SERIAL_TYPE_HARD_WARE 2
 
 #pragma pack(push)
 #pragma pack(1)
@@ -113,6 +115,7 @@ public:
     int LastErr;
 
     FwBox_PMSX003(SoftwareSerial* pPmsSerial);
+    FwBox_PMSX003(HardwareSerial* pPmsSerial);
     void begin();
     PMS5003T_DATA* readPms();
     int pm1_0(); // PM1.0 ug/m^3
@@ -129,9 +132,12 @@ public:
     
     void sleep();
     void wakeup();
+    int getLastError();
 
 private:
-    SoftwareSerial* PmsSerial;
+    Stream* PmsSerial;
+    void initVariables();
+    int SerialType = SERIAL_TYPE_SOFT_WARE;
     uint8_t Buff[MAX_PMS_DATA_SIZE];
     PMS5003T_DATA* Pd;
     PMS_TYPE DeviceType;

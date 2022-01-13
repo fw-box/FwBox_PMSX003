@@ -24,20 +24,37 @@
 FwBox_PMSX003::FwBox_PMSX003(SoftwareSerial* pPmsSerial)
 {
     PmsSerial = pPmsSerial;
-    
+    FwBox_PMSX003::initVariables();
+    FwBox_PMSX003::SerialType = SERIAL_TYPE_SOFT_WARE;
+}
+FwBox_PMSX003::FwBox_PMSX003(HardwareSerial* pPmsSerial)
+{
+    PmsSerial = pPmsSerial;
+    FwBox_PMSX003::initVariables();
+    FwBox_PMSX003::SerialType = SERIAL_TYPE_HARD_WARE;
+}
+
+void FwBox_PMSX003::initVariables()
+{
+    FwBox_PMSX003::SerialType = SERIAL_TYPE_SOFT_WARE;
+	
     FwBox_PMSX003::DeviceType = PMS5003T; // default
     
     DelayValue[FwBox_PMSX003::AFTER_SEND_PASSIVE_CMD] = 100;
-    DelayValue[FwBox_PMSX003::AFTER_SEND_REQUEST_CMD] = 30;
+    DelayValue[FwBox_PMSX003::AFTER_SEND_REQUEST_CMD] = 50;
     DelayValue[FwBox_PMSX003::SERIAL_READ] = 5;
     
-    LastErr = 0;
+    FwBox_PMSX003::LastErr = 0;
 }
 
 void FwBox_PMSX003::begin()
 {
-
-    PmsSerial->begin(9600);
+    if (FwBox_PMSX003::SerialType == SERIAL_TYPE_SOFT_WARE) {
+        ((SoftwareSerial*)PmsSerial)->begin(9600);
+    }
+    else {
+        ((HardwareSerial*)PmsSerial)->begin(9600);
+    }
 
 
     //
@@ -53,6 +70,8 @@ PMS5003T_DATA* FwBox_PMSX003::readPms() {
     unsigned char c;
     unsigned long pms_timeout = 0;
     int data_len = 0;
+    
+    LastErr = 0;
 
     //
     // Send request read
@@ -116,12 +135,14 @@ PMS5003T_DATA* FwBox_PMSX003::readPms() {
     if(data_len == 0) { // data error
         LastErr = 2;
         Pd = 0;
+        //Serial.println("ERROR : 02");
         return Pd;
     }
     else {
         if(bi < (data_len + 4)) { // timeout
             LastErr = 3;
             Pd = 0;
+            //Serial.println("ERROR : 03");
             return Pd;
         }
     }
@@ -145,16 +166,17 @@ PMS5003T_DATA* FwBox_PMSX003::readPms() {
       bi += Buff[i];
     }
 
-    //Serial.printf("Pd->DATA_LENGTH=%d\n", Pd->DATA_LENGTH);
+    Serial.printf("Pd->DATA_LENGTH=%d\n", Pd->DATA_LENGTH);
 
     if (Pd->DATA_LENGTH == 28) {
         if(bi != Pd->CHECKSUM) { // checksum error
             LastErr = 4;
             Pd = 0;
+            Serial.println("ERROR : 04");
             return Pd;
         }
         else {
-            if((Pd->PM_TEMP < 10) && (Pd->PM_HUMI < 10)) // Temperature=Pd->PM_TEMP/10, Humidity=Pd->PM_HUMI/10
+            if(Pd->PM_HUMI < 20) // Temperature=Pd->PM_TEMP/10, Humidity=Pd->PM_HUMI/10
                 FwBox_PMSX003::DeviceType = PMS5003;
             else
                 FwBox_PMSX003::DeviceType = PMS5003T;
@@ -165,6 +187,7 @@ PMS5003T_DATA* FwBox_PMSX003::readPms() {
         if(bi != Pd3003->CHECKSUM) { // checksum error
             LastErr = 5;
             Pd = 0;
+            //Serial.println("ERROR : 05");
             return Pd;
         }
         else {
@@ -178,6 +201,7 @@ PMS5003T_DATA* FwBox_PMSX003::readPms() {
     else {
         LastErr = 6;
         Pd = 0;
+        //Serial.println("ERROR : 06");
         return Pd;
     }
 }
@@ -263,4 +287,9 @@ void FwBox_PMSX003::wakeup()
 {
     PmsSerial->write(PMS_CMD_WAKEUP, sizeof(PMS_CMD_WAKEUP));
     delay(DelayValue[FwBox_PMSX003::AFTER_SEND_PASSIVE_CMD]);
+}
+
+int FwBox_PMSX003::getLastError()
+{
+	return FwBox_PMSX003::LastErr;
 }
