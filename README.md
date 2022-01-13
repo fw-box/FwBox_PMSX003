@@ -2,7 +2,15 @@
 The library is for PMS5003, PMS5003T, PMS3003.
 
 
-SoftwareSerial example:
+# SoftwareSerial example:
+The example is for ESP8266.
+Wiring:
+| PMS3003 or PMS5003 | ESP8266 |
+|-----|-----|
+| VCC | 5V |
+| GND | GND |
+| RXD | GPIO15 (D8) |
+| TXD | GPIO13 (D7) |
 -----------
     #include "FwBox_PMSX003.h"
 
@@ -69,7 +77,15 @@ SoftwareSerial example:
     }
 
 
-HardwareSerial example:
+# HardwareSerial example:
+The example is for ESP32 UART2.
+Wiring:
+| PMS3003 or PMS5003 | ESP32 |
+|-----|-----|
+| VCC | 5V |
+| GND | GND |
+| RXD | GPIO17 (UART 2 TX) |
+| TXD | GPIO16 (UART 2 RX) |
 -----------
     #include "FwBox_PMSX003.h"
 
