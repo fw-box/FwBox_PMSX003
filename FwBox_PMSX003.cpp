@@ -166,7 +166,7 @@ PMS5003T_DATA* FwBox_PMSX003::readPms() {
       bi += Buff[i];
     }
 
-    Serial.printf("Pd->DATA_LENGTH=%d\n", Pd->DATA_LENGTH);
+    //Serial.printf("Pd->DATA_LENGTH=%d\n", Pd->DATA_LENGTH);
 
     if (Pd->DATA_LENGTH == 28) {
         if(bi != Pd->CHECKSUM) { // checksum error
